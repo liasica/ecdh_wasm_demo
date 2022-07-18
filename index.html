@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CryptoDemo</title>
+    <script src="wasm_exec.js"></script>
+    <script src="http://cdn.bootcdn.net/ajax/libs/crypto-js/4.0.0/crypto-js.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+      }
+
+      textarea {
+        width: 100%;
+      }
+    </style>
+    <script>
+        if (!WebAssembly.instantiateStreaming) { // polyfill
+            WebAssembly.instantiateStreaming = async (resp, importObject) => {
+                const source = await (await resp).arrayBuffer()
+                return await WebAssembly.instantiate(source, importObject)
+            }
+        }
+        const go = new Go()
+        WebAssembly.instantiateStreaming(fetch('main.wasm'), go.importObject).then((result) => go.run(result.instance))
+
+        function start() {
+            const message = document.querySelector('#message').value.trim()
+            const times = parseInt(document.querySelector('#times').value, 10) || 0
+            if (message.length == 0 || times == 0) {
+                return alert('入参错误')
+            }
+            console.info(`即将测试: '${message}' ${times}次`)
+            runner(message, times)
+        }
+
+        function AES_ECB_ENCRYPT(text, secretKey) {
+            const keyHex = CryptoJS.enc.Base64.parse(secretKey);
+            const messageHex = CryptoJS.enc.Utf8.parse(text);
+            const encrypted = CryptoJS.AES.encrypt(messageHex, keyHex, {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            })
+            return encrypted.toString()
+        }
+
+        function originEncrypt() {
+            const message = document.querySelector('#message').value.trim()
+            const times = parseInt(document.querySelector('#times').value, 10) || 0
+            if (message.length == 0 || times == 0) {
+                return alert('入参错误')
+            }
+            const start = new Date().getTime()
+            for (let i = 0; i < times; i++) {
+                AES_ECB_ENCRYPT(message, 'KUf4hM5rThssysJhcRFCfxLR8Imihjl0eMsyhh1M7Wk')
+            }
+            const end = new Date().getTime()
+            console.info(`原生加密执行完毕, 总耗时${end - start}ms`)
+        }
+    </script>
+</head>
+<body>
+<textarea id="message" cols="30" rows="10">滚滚长江东逝水，浪花淘尽英雄。是非成败转头空，青山依旧在，几度夕阳红。白发渔樵江渚上，惯看秋月春风。一壶浊酒喜相逢，古今多少事， 都付笑谈中。滚滚长江东逝水，浪花淘尽英雄。是非成败转头空，青山依旧在，几度夕阳红。白发渔樵江渚上，惯看秋月春风。一壶浊酒喜相逢，古今多少事， 都付笑谈中。滚滚长江东逝水，浪花淘尽英雄。是非成败转头空，青山依旧在，几度夕阳红。白发渔樵江渚上，惯看秋月春风。一壶浊酒喜相逢，古今多少事， 都付笑谈中。</textarea>
+<br/>
+<br/>
+<input type="number" id="times" placeholder="加密次数" value="1">
+<br/>
+<br/>
+<button onclick="start()">开始执行</button>
+<br/>
+<br/>
+<button onclick="originEncrypt()">原生加密测试</button>
+</body>
+</html>
