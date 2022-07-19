@@ -6,6 +6,8 @@
 // Based on crypto_wasm by liasica, magicrolan@qq.com.
 
 // 瘦身 https://yryz.net/post/go-wasm/
+// GOOS=js GOARCH=wasm go build -o main.wasm
+// tinygo build -o tiny/crypto.wasm -target wasm ./main.go
 
 package main
 

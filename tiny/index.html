@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>CryptoDemo</title>
     <script src="wasm_exec.js"></script>
-    <script src="http://cdn.bootcdn.net/ajax/libs/crypto-js/4.0.0/crypto-js.js"></script>
     <style>
       body {
         margin: 0;
@@ -25,7 +24,7 @@
             }
         }
         const go = new Go()
-        WebAssembly.instantiateStreaming(fetch('main.wasm'), go.importObject).then((result) => go.run(result.instance))
+        WebAssembly.instantiateStreaming(fetch('crypto.wasm'), go.importObject).then((result) => go.run(result.instance))
 
         function start() {
             const message = document.querySelector('#message').value.trim()
@@ -47,29 +46,15 @@
             return encrypted.toString()
         }
 
-        function generateRamStr(len) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-            let randomStr = ''
-            for (var i = 0; i < len; i++) {
-                randomStr += chars.charAt(Math.floor(Math.random() * chars.length))
-            }
-            return randomStr
-        }
-
         function originEncrypt() {
             const message = document.querySelector('#message').value.trim()
             const times = parseInt(document.querySelector('#times').value, 10) || 0
             if (message.length == 0 || times == 0) {
                 return alert('入参错误')
             }
-            console.info(`生成${times}个key`)
-            const keys = []
-            for (let i = 0; i < times; i++) {
-                keys.push(generateRamStr(43))
-            }
             const start = new Date().getTime()
             for (let i = 0; i < times; i++) {
-                AES_ECB_ENCRYPT(message, keys[i])
+                AES_ECB_ENCRYPT(message, 'KUf4hM5rThssysJhcRFCfxLR8Imihjl0eMsyhh1M7Wk')
             }
             const end = new Date().getTime()
             console.info(`原生加密执行完毕, 总耗时${end - start}ms`)
@@ -84,8 +69,5 @@
 <br/>
 <br/>
 <button onclick="start()">开始执行</button>
-<br/>
-<br/>
-<button onclick="originEncrypt()">参考: 原生加密测试 (AES_ECB_ENCRYPT)</button>
 </body>
 </html>
