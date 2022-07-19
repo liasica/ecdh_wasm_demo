@@ -1,3 +1,5 @@
 .DS_Store
 *.wasm
 .idea
+/build
+crypto_wasm.zip
