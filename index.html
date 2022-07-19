@@ -37,12 +37,17 @@
             runner(message, times)
         }
 
-        function AES_ECB_ENCRYPT(text, secretKey) {
-            const keyHex = CryptoJS.enc.Base64.parse(secretKey);
-            const messageHex = CryptoJS.enc.Utf8.parse(text);
+        function AES_CBC_ENCRYPT(text, secretKey) {
+            const keyHex = CryptoJS.enc.Base64.parse(secretKey)
+            const ivHex = keyHex.clone()
+            // 前16字节作为向量
+            ivHex.sigBytes = 16
+            ivHex.words.splice(4)
+            const messageHex = CryptoJS.enc.Utf8.parse(text)
             const encrypted = CryptoJS.AES.encrypt(messageHex, keyHex, {
-                mode: CryptoJS.mode.ECB,
-                padding: CryptoJS.pad.Pkcs7
+                iv: ivHex,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7,
             })
             return encrypted.toString()
         }
@@ -69,7 +74,7 @@
             }
             const start = new Date().getTime()
             for (let i = 0; i < times; i++) {
-                AES_ECB_ENCRYPT(message, keys[i])
+                AES_CBC_ENCRYPT(message, keys[i])
             }
             const end = new Date().getTime()
             console.info(`原生加密执行完毕, 总耗时${end - start}ms`)
@@ -86,6 +91,6 @@
 <button onclick="start()">开始执行</button>
 <br/>
 <br/>
-<button onclick="originEncrypt()">参考: 原生加密测试 (AES_ECB_ENCRYPT)</button>
+<button onclick="originEncrypt()">参考: 原生加密测试 (AES_CBC_ENCRYPT)</button>
 </body>
 </html>
