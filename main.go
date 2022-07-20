@@ -16,6 +16,7 @@ import (
     "crypto_wasm/dh"
     "fmt"
     "log"
+    "sync"
     "syscall/js"
     "time"
 )
@@ -40,33 +41,54 @@ func start(_ js.Value, args []js.Value) interface{} {
     num := args[1].Int()
 
     log.Printf("开始生成%d个密钥\n", num)
-    keys := make(map[int][]byte)
+    var keys sync.Map
+    var kwg sync.WaitGroup
     for i := 0; i < num; i++ {
-        keys[i] = dh.GenerateKey()
+        kwg.Add(1)
+        go func(i int) {
+            keys.Store(i, dh.GenerateKey())
+            kwg.Done()
+        }(i)
     }
+    kwg.Wait()
     log.Printf("已生成%d个密钥, 开始测试%d次加密\n", num, num)
 
     xs := make(map[int][]byte)
 
     now := time.Now()
+    var wg sync.WaitGroup
     for i := 0; i < num; i++ {
-        x, err := crypto.AesEncrypt(b, keys[i])
-        if err != nil {
-            log.Fatalln(err)
-        }
-        xs[i] = x
+        wg.Add(1)
+        go func(i int) {
+            key, _ := keys.Load(i)
+            x, err := crypto.AesEncrypt(b, key.([]byte))
+            if err != nil {
+                log.Fatalln(err)
+            }
+            xs[i] = x
+            wg.Done()
+        }(i)
     }
+    wg.Wait()
     t := float64(time.Now().Sub(now).Microseconds()) / 1000
     log.Printf("测试%d次加密完成, 耗时%.2fms\n", num, t)
 
     log.Printf("开始测试%d次解密\n", num)
     now = time.Now()
+    var dwg sync.WaitGroup
     for i := 0; i < num; i++ {
-        _, err := crypto.AesDecrypt(xs[i], keys[i])
-        if err != nil {
-            log.Fatalln(err)
-        }
+        dwg.Add(1)
+        go func(i int) {
+            key, _ := keys.Load(i)
+            _, err := crypto.AesDecrypt(xs[i], key.([]byte))
+            if err != nil {
+                log.Fatalln(err)
+            }
+            dwg.Done()
+        }(i)
     }
+
+    dwg.Wait()
     t = float64(time.Now().Sub(now).Microseconds()) / 1000
     log.Printf("测试%d次解密完成, 耗时%.2fms\n", num, t)
 
