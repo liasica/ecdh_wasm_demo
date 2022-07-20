@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>CryptoDemo</title>
     <script src="wasm_exec.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/crypto-js/4.1.1/core.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.bootcdn.net/ajax/libs/pako/2.0.4/pako.min.js"></script>
     <style>
       body {
@@ -43,7 +43,7 @@
             if (message.length == 0 || times == 0) {
                 return alert('入参错误')
             }
-            console.info(`即将测试: '${message}' ${times}次`)
+            console.info(`即将测试: (${message.length}长度)原始文本加密${times}次`)
             runner(message, times)
         }
 
@@ -53,9 +53,8 @@
             if (message.length == 0 || times == 0) {
                 return alert('入参错误')
             }
-            console.info(`即将测试: '${message}' ${times}次`)
-            const str = zip(message)
-            runner(str, times)
+            console.info(`即将测试: (${message.length}长度)ZIP压缩加密${times}次`)
+            runner(zip(message), times)
         }
 
         function AES_CBC_ENCRYPT(text, secretKey) {
@@ -98,7 +97,7 @@
                 AES_CBC_ENCRYPT(message, keys[i])
             }
             const end = new Date().getTime()
-            console.info(`原生加密执行完毕, 总耗时${end - start}ms`)
+            console.info(`原生加密执行完毕, (${message.length}长度)总耗时${end - start}ms`)
         }
 
         function count(input) {
