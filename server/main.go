@@ -6,51 +6,17 @@
 package main
 
 import (
-    "crypto/ecdsa"
-    "crypto/elliptic"
-    "crypto/rand"
-    "crypto/sha256"
-    "fmt"
+    "log"
+    "net/http"
 )
 
 func main() {
-    // fs := http.FileServer(http.Dir("."))
-    // http.Handle("/", fs)
-    //
-    // log.Println("Listening on :3000...")
-    // err := http.ListenAndServe(":3000", nil)
-    // if err != nil {
-    //     log.Fatal(err)
-    // }
+    fs := http.FileServer(http.Dir("."))
+    http.Handle("/", fs)
 
-    fmt.Printf("--ECC Parameters--\n")
-    fmt.Printf(" Name: %s\n", elliptic.P256().Params().Name)
-    fmt.Printf(" N: %x\n", elliptic.P256().Params().N)
-    fmt.Printf(" P: %x\n", elliptic.P256().Params().P)
-    fmt.Printf(" Gx: %x\n", elliptic.P256().Params().Gx)
-    fmt.Printf(" Gy: %x\n", elliptic.P256().Params().Gy)
-    fmt.Printf(" Bitsize: %x\n\n", elliptic.P256().Params().BitSize)
-
-    priva, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-    privb, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-
-    puba := priva.PublicKey
-    pubb := privb.PublicKey
-
-    fmt.Printf("\nPrivate key (Alice) %x", priva.D)
-    fmt.Printf("\nPrivate key (Bob) %x\n", privb.D)
-
-    pubab := elliptic.MarshalCompressed(priva.Curve, priva.PublicKey.X, priva.PublicKey.Y)
-    pubbb := elliptic.MarshalCompressed(privb.Curve, privb.PublicKey.X, privb.PublicKey.Y)
-    fmt.Printf("\nPublic key (Alice) (%x %x) = %s", puba.X, puba.Y, pubab)
-    fmt.Printf("\nPublic key (Bob) (%x %x) = %s\n", pubb.X, pubb.Y, pubbb)
-
-    a, _ := puba.Curve.ScalarMult(puba.X, puba.Y, privb.D.Bytes())
-    b, _ := pubb.Curve.ScalarMult(pubb.X, pubb.Y, priva.D.Bytes())
-
-    shared1 := sha256.Sum256(a.Bytes())
-    shared2 := sha256.Sum256(b.Bytes())
-
-    fmt.Printf("\nShared key (Alice) %x", shared1)
-    fmt.Printf("\nShared key (Bob)  %x", shared2)
+    log.Println("Listening on :3000...")
+    err := http.ListenAndServe(":3000", nil)
+    if err != nil {
+        log.Fatal(err)
+    }
 }
