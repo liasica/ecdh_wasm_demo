@@ -40,8 +40,10 @@ func main() {
     fmt.Printf("\nPrivate key (Alice) %x", priva.D)
     fmt.Printf("\nPrivate key (Bob) %x\n", privb.D)
 
-    fmt.Printf("\nPublic key (Alice) (%x %x)", puba.X, puba.Y)
-    fmt.Printf("\nPublic key (Bob) (%x %x)\n", pubb.X, pubb.Y)
+    pubab := elliptic.MarshalCompressed(priva.Curve, priva.PublicKey.X, priva.PublicKey.Y)
+    pubbb := elliptic.MarshalCompressed(privb.Curve, privb.PublicKey.X, privb.PublicKey.Y)
+    fmt.Printf("\nPublic key (Alice) (%x %x) = %s", puba.X, puba.Y, pubab)
+    fmt.Printf("\nPublic key (Bob) (%x %x) = %s\n", pubb.X, pubb.Y, pubbb)
 
     a, _ := puba.Curve.ScalarMult(puba.X, puba.Y, privb.D.Bytes())
     b, _ := pubb.Curve.ScalarMult(pubb.X, pubb.Y, priva.D.Bytes())
