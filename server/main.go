@@ -40,7 +40,7 @@ func main() {
     fmt.Printf("\nPrivate key (Alice) %x", priva.D)
     fmt.Printf("\nPrivate key (Bob) %x\n", privb.D)
 
-    fmt.Printf("\nPublic key (Alice) (%x %x = %d %d)", puba.X, puba.Y, puba.X, puba.Y)
+    fmt.Printf("\nPublic key (Alice) (%x %x)", puba.X, puba.Y)
     fmt.Printf("\nPublic key (Bob) (%x %x)\n", pubb.X, pubb.Y)
 
     a, _ := puba.Curve.ScalarMult(puba.X, puba.Y, privb.D.Bytes())
